@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNS 메인 페이지</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #a8e6cf, #dcedc1);
+            margin: 0;
+            padding: 20px 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 20px;
+        }
+        .post-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .post {
+            border-bottom: 1px solid #e9ebee;
+            padding: 10px 0;
+        }
+        .post:last-child {
+            border-bottom: none;
+        }
+        .post-title, .comment-content {
+            font-size: 16px;
+            color: #4CAF50;
+        }
+        .post-content, .comment-text {
+            margin: 10px 0;
+            color: #333;
+        }
+        .btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #5fa477;
+            font-size: 14px;
+            transition: color 0.3s;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            color: #588971ac;
+        }
+        .hidden {
+            display: none;
+        }
+        .like-btn.active {
+            color: #588971ac; 
+        }
+        .delete-comment-btn {
+            color: #588971ac; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>메인</h2>
+        <div id="other-posts">
+        </div>
+    </div>
+
+    <script>
+        let otherPosts = [
+            { id: 1, userId: 1, title: "사용자1", content: "사용자1의 내용 1", comments: [{ id: 1, content: "사용자1의 댓글 1", likes: 0, isMine: false }, { id: 2, content: "사용자1의 댓글 2", likes: 0, isMine: false }], isFollowed: false },
+            { id: 2, userId: 1, title: "사용자1", content: "사용자1의 내용 2", comments: [{ id: 1, content: "사용자1의 댓글 3", likes: 0, isMine: false }, { id: 2, content: "사용자1의 댓글 4", likes: 0, isMine: false }], isFollowed: false },
+            { id: 3, userId: 2, title: "사용자2", content: "사용자2의 내용 3", comments: [{ id: 1, content: "사용자2의 댓글 1", likes: 0, isMine: false }, { id: 2, content: "사용자2의 댓글 2", likes: 0, isMine: false }], isFollowed: false },
+            { id: 4, userId: 2, title: "사용자2", content: "사용자2의 내용 2", comments: [{ id: 1, content: "사용자2의 댓글 3", likes: 0, isMine: false }, { id: 2, content: "사용자2의 댓글 4", likes: 0, isMine: false }], isFollowed: false },
+            { id: 5, userId: 3, title: "사용자3", content: "사용자3의 내용 1", comments: [{ id: 1, content: "사용자3의 댓글 1", likes: 0, isMine: false }, { id: 2, content: "사용자3의 댓글 2", likes: 0, isMine: false }], isFollowed: false },
+            { id: 6, userId: 3, title: "사용자3", content: "사용자3의 내용 2", comments: [{ id: 1, content: "사용자3의 댓글 3", likes: 0, isMine: false }, { id: 2, content: "사용자3의 댓글 4", likes: 0, isMine: false }], isFollowed: false }
+        ];
+
+        function showCommentBox(postId) {
+            const commentBox = document.getElementById(`comment-box-${postId}`);
+            commentBox.classList.toggle('hidden');
+        }
+
+        function addComment(postId) {
+            const textArea = document.getElementById(`comment-text-${postId}`);
+            const commentText = textArea.value.trim();
+            if (commentText === '') return;
+
+            const newComment = { id: Date.now(), content: commentText, isMine: true };
+            const post = otherPosts.find(post => post.id === postId);
+            post.comments.push(newComment);
+
+            textArea.value = '';
+            renderComments(postId);
+        }
+
+        function toggleFollow(userId, username) {
+            otherPosts.forEach(post => {
+                if (post.userId === userId) {
+                    post.isFollowed = !post.isFollowed;
+                }
+            });
+
+            if (otherPosts.find(post => post.userId === userId).isFollowed) {
+                addToFollowList(username);
+            } else {
+                removeFromFollowList(username);
+            }
+
+            renderPosts();
+        }
+
+        function addToFollowList(username) {
+            let followList = JSON.parse(localStorage.getItem('followList')) || [];
+            if (!followList.includes(username)) {
+                followList.push(username);
+                localStorage.setItem('followList', JSON.stringify(followList));
+            }
+        }
+
+        function removeFromFollowList(username) {
+            let followList = JSON.parse(localStorage.getItem('followList')) || [];
+            followList = followList.filter(user => user !== username);
+            localStorage.setItem('followList', JSON.stringify(followList));
+        }
+
+        function toggleLike(postId, commentId) {
+            const post = otherPosts.find(post => post.id === postId);
+            const comment = post.comments.find(comment => comment.id === commentId);
+            comment.likes = comment.likes === 1 ? 0 : 1;
+            renderComments(postId);
+        }
+
+        function deleteComment(postId, commentId) {
+            const post = otherPosts.find(post => post.id === postId);
+            post.comments = post.comments.filter(comment => comment.id !== commentId);
+            renderComments(postId);
+        }
+
+        function renderComments(postId) {
+            const post = otherPosts.find(post => post.id === postId);
+            const commentsContainer = document.getElementById(`comments-${postId}`);
+            commentsContainer.innerHTML = '';
+
+            post.comments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+                commentDiv.innerHTML = `
+                    <div class="comment-content">${comment.content}</div>
+                    ${comment.isMine ? `<button class="btn delete-comment-btn" onclick="deleteComment(${post.id}, ${comment.id})">삭제</button>` : `<button class="btn like-btn ${comment.likes === 1 ? 'active' : ''}" onclick="toggleLike(${post.id}, ${comment.id})">${comment.likes === 1 ? '좋아요 취소' : '좋아요'}</button>`}
+                `;
+                commentsContainer.appendChild(commentDiv);
+            });
+        }
+
+        function renderPosts() {
+            const container = document.getElementById('other-posts');
+            container.innerHTML = '';
+
+            otherPosts.forEach(post => {
+                const postContainer = document.createElement('div');
+                postContainer.className = 'post-container';
+
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.id = `post-${post.id}`;
+                postDiv.innerHTML = `
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-content">${post.content}</div>
+                    <button class="btn comment-btn" onclick="showCommentBox(${post.id})">댓글 쓰기</button>
+                    <button class="btn follow-btn" onclick="toggleFollow(${post.userId}, '${post.title}')">${post.isFollowed ? '언팔로우' : '팔로우'}</button>
+                    <div id="comment-box-${post.id}" class="comment-box hidden">
+                        <textarea id="comment-text-${post.id}" class="comment-text" rows="2" placeholder="댓글 입력"></textarea>
+                        <button class="btn add-comment-btn" onclick="addComment(${post.id})">댓글 업로드</button>
+                    </div>
+                    <div id="comments-${post.id}" class="comments"></div>
+                `;
+
+                postContainer.appendChild(postDiv);
+                container.appendChild(postContainer);
+
+                renderComments(post.id);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderPosts);
+    </script>
+</body>
+</html>

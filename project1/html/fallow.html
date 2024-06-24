@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팔로우 목록 페이지</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #a8e6cf, #dcedc1);
+            margin: 0;
+            padding: 20px 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 20px;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>팔로우 목록</h2>
+        <ul id="follow-list">
+        </ul>
+    </div>
+
+    <script>
+        function renderFollowList() {
+            const followList = JSON.parse(localStorage.getItem('followList')) || [];
+            const followListContainer = document.getElementById('follow-list');
+            followListContainer.innerHTML = '';
+
+            followList.forEach((user, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = user;
+                listItem.addEventListener('click', () => {
+                    window.location.href = `http://127.0.0.1:5500/project1/html/user${index + 1}.html`;
+                });
+                followListContainer.appendChild(listItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderFollowList);
+    </script>
+</body>
+</html>

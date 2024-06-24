@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 및 회원가입</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #a8e6cf, #dcedc1); /* 편안한 색상의 그라디언트 */
+            margin: 0;
+        }
+        .container {
+            width: 350px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #a8e6cf;
+        }
+        button {
+            padding: 10px;
+            background-color: #a8e6cf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%; /* 버튼 크기를 입력칸과 동일하게 설정 */
+        }
+        button:hover {
+            background-color: #dcedc1;
+        }
+        .toggle-btn {
+            background-color: #dcedc1;
+            margin-top: 10px;
+            width: auto; /* 토글 버튼은 입력칸과 동일하지 않게 설정 */
+        }
+        .toggle-btn:hover {
+            background-color: #a8e6cf;
+        }
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+        }
+        .form-buttons-right {
+            display: flex;
+            justify-content: flex-end;
+        }
+        #duplicate-check-result {
+            margin-top: 10px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <h2>로그인</h2>
+        <form name="login_form" method="post" action="http://localhost:8080/project1/login.jsp">
+            <input type="text" name="id" id="login-username" placeholder="사용자 이름" required>
+            <input type="password" name="pw" id="login-password" placeholder="비밀번호" required>
+            <div class="form-buttons">
+                <button type="submit">로그인</button>
+            </div>
+        </form>
+        <div class="form-buttons-right">
+            <button class="toggle-btn" onclick="toggleForm()">회원가입</button>
+        </div>
+    </div>
+
+    <div class="container" id="signup-container" style="display: none;">
+        <h2>회원가입</h2>
+        <form name="signup_form" method="post" action="http://localhost:8080/project1/signup.jsp">
+            <input type="text" name="username" id="signup-username" placeholder="사용자 이름" required>
+            <input type="email" name="email" id="signup-email" placeholder="이메일" required>
+            <input type="password" name="password" id="signup-password" placeholder="비밀번호" required>
+            <input type="password" name="confirmPassword" id="signup-confirm-password" placeholder="비밀번호 확인" required>
+            <button type="button" onclick="openDuplicateCheckPage()">아이디 중복 체크</button>
+            <div id="duplicate-check-result"></div>
+            <div class="form-buttons">
+                <button type="submit">회원가입</button>
+            </div>
+        </form>
+        <div class="form-buttons-right">
+            <button class="toggle-btn" onclick="toggleForm()">로그인</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const loginContainer = document.getElementById('login-container');
+            const signupContainer = document.getElementById('signup-container');
+            if (loginContainer.style.display === 'none') {
+                loginContainer.style.display = 'block';
+                signupContainer.style.display = 'none';
+            } else {
+                loginContainer.style.display = 'none';
+                signupContainer.style.display = 'block';
+            }
+        }
+
+        function openDuplicateCheckPage() {
+            const username = document.getElementById('signup-username').value;
+            if (username) {
+                window.open(`/checkDuplicate?id=${username}`, "_blank", "width=600,height=400");
+            } else {
+                alert('사용자 이름을 입력하세요.');
+            }
+        }
+    </script>
+</body>
+</html>
